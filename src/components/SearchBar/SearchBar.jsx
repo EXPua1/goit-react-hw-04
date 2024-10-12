@@ -1,4 +1,4 @@
-import css from "./SearchForm.module.css";
+import css from "./SearchBar.module.css";
 import toast, { Toaster } from "react-hot-toast";
 
 const SearchForm = ({ onSearch }) => {

@@ -3,7 +3,7 @@ import "modern-normalize";
 import "./index.css";
 import {
   Container,
-  SearchForm,
+  SearchBar,
   Section,
   ImageGallery,
   LoadMoreBtn,
@@ -36,7 +36,7 @@ const App = () => {
     setNoImagesFound(false); // Сбрасываем состояние "изображения не найдены"
 
     try {
-      const responseData = await fetchImages(query, page);
+      const responseData = await fetchImages(query, 1);
       setImages(responseData.results); // Устанавливаем массив изображений
       setNoImagesFound(responseData.results.length === 0);
       setTotalPages(responseData.total_pages); // Устанавливаем общее количество страниц
@@ -88,7 +88,7 @@ const App = () => {
   return (
     <Section>
       <Container>
-        <SearchForm onSearch={searchImage} />
+        <SearchBar onSearch={searchImage} />
         {images.length > 0 && (
           <ImageGallery data={images} onImageClick={openModal} />
         )}
