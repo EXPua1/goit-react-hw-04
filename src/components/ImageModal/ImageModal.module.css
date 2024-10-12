@@ -6,3 +6,10 @@
 .no-scroll {
   overflow: hidden; /* Отключаем прокрутку */
 }
+
+.description {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 25px;
+}

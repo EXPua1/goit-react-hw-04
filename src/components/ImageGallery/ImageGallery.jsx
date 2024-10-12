@@ -9,7 +9,7 @@ const GalleryList = ({ data, onImageClick }) => {
           <ImageCard
             data={item}
             onClick={() =>
-              onImageClick(item.urls.regular, item.alt_description)
+              onImageClick(item.urls.regular, item.alt_description, item.likes)
             }
           />
         </li>

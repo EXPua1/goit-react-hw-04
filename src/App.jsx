@@ -24,6 +24,7 @@ const App = () => {
   const [selectedImage, setSelectedImage] = useState({
     imageUrl: "",
     altText: "",
+    description: "",
   });
   const [areImagesLoaded, setAreImagesLoaded] = useState(false);
   const [noImagesFound, setNoImagesFound] = useState(false);
@@ -37,6 +38,8 @@ const App = () => {
 
       try {
         const responseData = await fetchImages(query, page);
+        console.log(responseData);
+
         if (page === 1) {
           setImages(responseData.results); // Якщо новий пошук, скидаємо попередні зображення
         } else {
@@ -68,8 +71,8 @@ const App = () => {
     }
   };
 
-  const openModal = (imageUrl, altText) => {
-    setSelectedImage({ imageUrl, altText });
+  const openModal = (imageUrl, altText, description) => {
+    setSelectedImage({ imageUrl, altText, description });
     setIsModalOpen(true);
   };
 
@@ -106,6 +109,7 @@ const App = () => {
             onClose={closeModal}
             imageUrl={selectedImage.imageUrl}
             altText={selectedImage.altText}
+            description={selectedImage.description}
           />
         )}
         {noImagesFound && <div>No images found for your query.</div>}

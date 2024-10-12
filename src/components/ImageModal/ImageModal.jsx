@@ -15,12 +15,12 @@ const customStyles = {
     marginRight: "-50%",
     transform: "translate(-50%, -50%)",
     padding: "0",
-    background: "transparent",
+    background: "white",
     border: "none",
   },
 };
 
-const ImageModal = ({ isOpen, onClose, imageUrl, altText }) => {
+const ImageModal = ({ isOpen, onClose, imageUrl, altText, description }) => {
   // Закрытие модального окна при нажатии клавиши ESC
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -58,6 +58,9 @@ const ImageModal = ({ isOpen, onClose, imageUrl, altText }) => {
     >
       <div>
         <img src={imageUrl} alt={altText} className={css.modalImage} />
+        <div>
+          <p className={css.description}>Likes: {description}</p>
+        </div>
         <button onClick={onClose} className={css.closeButton}>
           Close
         </button>
