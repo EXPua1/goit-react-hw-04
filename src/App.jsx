@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "modern-normalize";
 import "./index.css";
 import {
@@ -7,6 +7,7 @@ import {
   Section,
   ImageGallery,
   LoadMoreBtn,
+  ImageModal,
 } from "./components";
 import { fetchImages } from "./services/unsplash-api";
 import { Circles } from "react-loader-spinner"; // Импортируем компонент лоадера
@@ -17,16 +18,26 @@ const App = () => {
   const [error, setError] = useState(null);
   const [query, setQuery] = useState(null);
   const [page, setPage] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState({
+    imageUrl: "",
+    altText: "",
+  });
+  const [areImagesLoaded, setAreImagesLoaded] = useState(false);
+  const [noImagesFound, setNoImagesFound] = useState(false);
 
   const searchImage = async (query) => {
     setLoader(true);
     setError(null);
     setPage(1);
     setQuery(query);
+    setAreImagesLoaded(false); // Сбрасываем состояние загрузки изображений
+    setNoImagesFound(false); // Сбрасываем состояние "изображения не найдены"
 
     try {
       const responseData = await fetchImages(query, page);
-      setImages(responseData); // Сохраняем полученные данные
+      setImages(responseData);
+      setNoImagesFound(responseData.length === 0);
     } catch (error) {
       setError(true);
     } finally {
@@ -39,6 +50,7 @@ const App = () => {
       const responseData = await fetchImages(query, page + 1); // Загружаем следующую страницу
       setImages((prevImages) => [...prevImages, ...responseData]); // Добавляем новые изображения к предыдущим
       setPage((prevPage) => prevPage + 1); // Увеличиваем номер страницы
+      setAreImagesLoaded(true); // Устанавливаем, что изображения загружены
     } catch (error) {
       setError(true);
     } finally {
@@ -46,11 +58,33 @@ const App = () => {
     }
   };
 
+  const openModal = (imageUrl, altText) => {
+    setSelectedImage({ imageUrl, altText });
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedImage({ imageUrl: "", altText: "" });
+  };
+
+  useEffect(() => {
+    if (areImagesLoaded) {
+      window.scrollTo({
+        top: window.scrollY + 750,
+        behavior: "smooth",
+      });
+      setAreImagesLoaded(false);
+    }
+  }, [areImagesLoaded]);
+
   return (
     <Section>
       <Container>
         <SearchForm onSearch={searchImage} />
-        {images.length > 0 && <ImageGallery data={images} />}
+        {images.length > 0 && (
+          <ImageGallery data={images} onImageClick={openModal} />
+        )}
         {loader && ( // Условный рендеринг лоадера
           <div
             style={{
@@ -70,6 +104,15 @@ const App = () => {
         )}
         {error && <div>Error occurred while fetching images.</div>}
         {images.length > 0 && <LoadMoreBtn onLoadMore={loadMoreImages} />}
+        {isModalOpen && (
+          <ImageModal
+            isOpen={isModalOpen}
+            onClose={closeModal}
+            imageUrl={selectedImage.imageUrl}
+            altText={selectedImage.altText}
+          />
+        )}
+        {noImagesFound && <div>No images found for your query.</div>}
       </Container>
     </Section>
   );

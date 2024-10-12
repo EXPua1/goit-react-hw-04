@@ -1,0 +1,8 @@
+.overlay {
+  position: fixed;
+  inset: 0px;
+  background-color: rgba(40, 39, 39, 0.75);
+}
+.no-scroll {
+  overflow: hidden; /* Отключаем прокрутку */
+}

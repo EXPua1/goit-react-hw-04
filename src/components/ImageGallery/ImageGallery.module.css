@@ -1,0 +1,16 @@
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+
+  justify-content: center;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.item {
+  flex: 1 1 300px; /* Все элементы будут одинаковой ширины */
+  max-width: 250px; /* Максимальная ширина карточки */
+  display: flex;
+  justify-content: center;
+}
