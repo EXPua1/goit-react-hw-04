@@ -17,5 +17,10 @@ export const fetchImages = async (query, page) => {
   };
 
   const response = await axios.get(`/search/photos`, options);
-  return response.data.results;
+
+  // Возвращаем результаты и total_pages
+  return {
+    results: response.data.results,
+    total_pages: response.data.total_pages,
+  };
 };

@@ -18,6 +18,7 @@ const App = () => {
   const [error, setError] = useState(null);
   const [query, setQuery] = useState(null);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState({
     imageUrl: "",
@@ -36,19 +37,25 @@ const App = () => {
 
     try {
       const responseData = await fetchImages(query, page);
-      setImages(responseData);
-      setNoImagesFound(responseData.length === 0);
+      setImages(responseData.results); // Устанавливаем массив изображений
+      setNoImagesFound(responseData.results.length === 0);
+      setTotalPages(responseData.total_pages); // Устанавливаем общее количество страниц
+
+      console.log("Response Data:", responseData);
+      console.log("Total Pages:", responseData.total_pages);
     } catch (error) {
       setError(true);
     } finally {
       setLoader(false);
     }
   };
+
   const loadMoreImages = async () => {
+    if (page >= totalPages) return; // Проверяем, есть ли еще страницы
     setLoader(true);
     try {
       const responseData = await fetchImages(query, page + 1); // Загружаем следующую страницу
-      setImages((prevImages) => [...prevImages, ...responseData]); // Добавляем новые изображения к предыдущим
+      setImages((prevImages) => [...prevImages, ...responseData.results]); // Добавляем новые изображения к предыдущим
       setPage((prevPage) => prevPage + 1); // Увеличиваем номер страницы
       setAreImagesLoaded(true); // Устанавливаем, что изображения загружены
     } catch (error) {
@@ -71,10 +78,10 @@ const App = () => {
   useEffect(() => {
     if (areImagesLoaded) {
       window.scrollTo({
-        top: window.scrollY + 750,
-        behavior: "smooth",
+        top: window.scrollY + 750, // Укажите желаемое количество пикселей для прокрутки
+        behavior: "smooth", // Плавная прокрутка
       });
-      setAreImagesLoaded(false);
+      setAreImagesLoaded(false); // Сбрасываем состояние после прокрутки
     }
   }, [areImagesLoaded]);
 
@@ -103,7 +110,10 @@ const App = () => {
           </div>
         )}
         {error && <div>Error occurred while fetching images.</div>}
-        {images.length > 0 && <LoadMoreBtn onLoadMore={loadMoreImages} />}
+        {images.length > 0 &&
+          page < totalPages && ( // Проверяем, есть ли еще страницы для загрузки
+            <LoadMoreBtn onLoadMore={loadMoreImages} />
+          )}
         {isModalOpen && (
           <ImageModal
             isOpen={isModalOpen}
