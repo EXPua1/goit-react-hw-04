@@ -1,26 +1,38 @@
 import css from "./SearchForm.module.css";
+import toast, { Toaster } from "react-hot-toast";
 
 const SearchForm = ({ onSearch }) => {
   const handleSubmit = (event) => {
-    event.preventDefault();
+    event.preventDefault(); // Предотвращаем автоматическую отправку формы
+    const notify = () => toast("Введите запрос для поиска", { duration: 2000 });
+
+    if (!event.target.elements.topic.value.trim()) {
+      // Проверяем на пустое значение
+      notify(); // Вызываем уведомление
+      return;
+    }
+
     const form = event.target;
-    const searchQuery = form.topic.value; // Извлекаем значение из поля ввода
+    const searchQuery = form.topic.value.trim(); // Извлекаем значение из поля ввода
     onSearch(searchQuery); // Вызываем функцию поиска с введенным запросом
     form.reset(); // Сбрасываем форму после отправки
   };
 
   return (
-    <form className={css.form} onSubmit={handleSubmit}>
-      <input
-        className={css.input}
-        type="text"
-        name="topic"
-        placeholder="Пошук картинок..."
-      />
-      <button className={css.btn} type="submit">
-        Пошук
-      </button>
-    </form>
+    <header className={css.header}>
+      <form className={css.form} onSubmit={handleSubmit}>
+        <input
+          className={css.input}
+          type="text"
+          name="topic"
+          placeholder="Поиск картинок..."
+        />
+        <button className={css.btn} type="submit">
+          Поиск
+        </button>
+      </form>
+      <Toaster /> {/* Не забудьте добавить Toaster для показа уведомлений */}
+    </header>
   );
 };
 
