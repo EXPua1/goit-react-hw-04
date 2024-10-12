@@ -8,9 +8,10 @@ import {
   ImageGallery,
   LoadMoreBtn,
   ImageModal,
+  Loader,
+  ErrorMessage,
 } from "./components";
 import { fetchImages } from "./services/unsplash-api";
-import { Circles } from "react-loader-spinner"; // Импортируем компонент лоадера
 
 const App = () => {
   const [images, setImages] = useState([]);
@@ -27,41 +28,43 @@ const App = () => {
   const [areImagesLoaded, setAreImagesLoaded] = useState(false);
   const [noImagesFound, setNoImagesFound] = useState(false);
 
-  const searchImage = async (query) => {
-    setLoader(true);
-    setError(null);
-    setPage(1);
-    setQuery(query);
-    setAreImagesLoaded(false); // Сбрасываем состояние загрузки изображений
-    setNoImagesFound(false); // Сбрасываем состояние "изображения не найдены"
+  // Виклик API коли query і page змінюються
+  useEffect(() => {
+    if (!query) return;
+    const fetchImageData = async () => {
+      setLoader(true);
+      setError(null);
 
-    try {
-      const responseData = await fetchImages(query, 1);
-      setImages(responseData.results); // Устанавливаем массив изображений
-      setNoImagesFound(responseData.results.length === 0);
-      setTotalPages(responseData.total_pages); // Устанавливаем общее количество страниц
+      try {
+        const responseData = await fetchImages(query, page);
+        if (page === 1) {
+          setImages(responseData.results); // Якщо новий пошук, скидаємо попередні зображення
+        } else {
+          setImages((prevImages) => [...prevImages, ...responseData.results]); // Додаємо нові зображення до існуючих
+        }
+        setNoImagesFound(responseData.results.length === 0);
+        setTotalPages(responseData.total_pages); // Встановлюємо загальну кількість сторінок
+      } catch (error) {
+        setError(true);
+      } finally {
+        setLoader(false);
+      }
+    };
 
-      console.log("Response Data:", responseData);
-      console.log("Total Pages:", responseData.total_pages);
-    } catch (error) {
-      setError(true);
-    } finally {
-      setLoader(false);
-    }
+    fetchImageData();
+  }, [query, page]);
+
+  const searchImage = (newQuery) => {
+    setPage(1); // Скидаємо сторінку при новому запиті
+    setQuery(newQuery); // Змінюємо запит
+    setAreImagesLoaded(false);
+    setNoImagesFound(false);
   };
 
-  const loadMoreImages = async () => {
-    if (page >= totalPages) return; // Проверяем, есть ли еще страницы
-    setLoader(true);
-    try {
-      const responseData = await fetchImages(query, page + 1); // Загружаем следующую страницу
-      setImages((prevImages) => [...prevImages, ...responseData.results]); // Добавляем новые изображения к предыдущим
-      setPage((prevPage) => prevPage + 1); // Увеличиваем номер страницы
-      setAreImagesLoaded(true); // Устанавливаем, что изображения загружены
-    } catch (error) {
-      setError(true);
-    } finally {
-      setLoader(false);
+  const loadMoreImages = () => {
+    if (page < totalPages) {
+      setPage((prevPage) => prevPage + 1); // Завантажуємо наступну сторінку
+      setAreImagesLoaded(true);
     }
   };
 
@@ -78,10 +81,10 @@ const App = () => {
   useEffect(() => {
     if (areImagesLoaded) {
       window.scrollTo({
-        top: window.scrollY + 750, // Укажите желаемое количество пикселей для прокрутки
-        behavior: "smooth", // Плавная прокрутка
+        top: window.scrollY + 750, // Прокрутка сторінки вниз
+        behavior: "smooth",
       });
-      setAreImagesLoaded(false); // Сбрасываем состояние после прокрутки
+      setAreImagesLoaded(false);
     }
   }, [areImagesLoaded]);
 
@@ -92,28 +95,11 @@ const App = () => {
         {images.length > 0 && (
           <ImageGallery data={images} onImageClick={openModal} />
         )}
-        {loader && ( // Условный рендеринг лоадера
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginTop: "20px",
-            }}
-          >
-            <Circles
-              height="80"
-              width="80"
-              color="#4fa94d"
-              ariaLabel="circles-loading"
-              visible={true}
-            />
-          </div>
+        {loader && <Loader />}
+        {error && <ErrorMessage />}
+        {images.length > 0 && page < totalPages && (
+          <LoadMoreBtn onLoadMore={loadMoreImages} />
         )}
-        {error && <div>Error occurred while fetching images.</div>}
-        {images.length > 0 &&
-          page < totalPages && ( // Проверяем, есть ли еще страницы для загрузки
-            <LoadMoreBtn onLoadMore={loadMoreImages} />
-          )}
         {isModalOpen && (
           <ImageModal
             isOpen={isModalOpen}
