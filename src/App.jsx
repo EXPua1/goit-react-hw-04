@@ -82,14 +82,13 @@ const App = () => {
   };
 
   useEffect(() => {
-    if (areImagesLoaded) {
+    if (images.length > 0 && !loader) {
       window.scrollTo({
-        top: window.scrollY + 750, // Прокрутка сторінки вниз
+        top: window.scrollY + 750, // Прокрутка страницы вниз
         behavior: "smooth",
       });
-      setAreImagesLoaded(false);
     }
-  }, [areImagesLoaded]);
+  }, [images, loader]);
 
   return (
     <Section>
